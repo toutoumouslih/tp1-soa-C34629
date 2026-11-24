@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: API Etudiants - TP1 SOA
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/soa-tp1/api
+paths:
+  /etudiants:
+    get:
+      summary: Lister les etudiants
+      responses:
+        '200':
+          description: Liste retournee
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Etudiant'
+    post:
+      summary: Creer un etudiant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantEntree'
+      responses:
+        '201':
+          description: Etudiant cree
+          headers:
+            Location:
+              description: URI de la ressource creee
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+  /etudiants/{id}:
+    get:
+      summary: Consulter un etudiant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Etudiant trouve
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+        '404':
+          description: Etudiant introuvable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erreur'
+components:
+  schemas:
+    EtudiantEntree:
+      type: object
+      required: [nom, email]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+    Etudiant:
+      allOf:
+        - $ref: '#/components/schemas/EtudiantEntree'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: integer
+              format: int64
+    Erreur:
+      type: object
+      required: [erreur, message]
+      properties:
+        erreur:
+          type: string
+        message:
+          type: string
+  responses:
+    ErreurValidation:
+      description: Entree invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erreur'
